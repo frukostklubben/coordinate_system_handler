@@ -137,7 +137,7 @@ int main(int argc, char **argv)
 	{
 		try
 		{
-			mapToKinectListener.lookupTransform("/camera_link", "/map, value> map;", ros::Time(0), transform); // get data from transform
+			mapToKinectListener.lookupTransform("/camera_link", "/map", ros::Time(0), transform); // get data from transform
 			// between /map and /camera_link frames
 		}
 		catch (tf::TransformException ex){ // no clue, some exception thingy that I didn't write.
