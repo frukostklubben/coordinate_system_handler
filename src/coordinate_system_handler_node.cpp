@@ -14,6 +14,7 @@
 #include "geometry_msgs/Pose.h"
 #include <eigen3/Eigen/Dense>
 #include <math.h>
+#include <stdio.h>
 
 #define PI 3.14159265
 
@@ -23,6 +24,7 @@ visualization_msgs::Marker tagPoseMarker;
 geometry_msgs::Pose tagPose;
 geometry_msgs::Pose robPose;
 visualization_msgs::Marker box;
+
 
 // function that handles the position of the robot (kinect being the centerpoint)
 Eigen::Matrix4f getHomTrans(const tf::StampedTransform transform)
@@ -122,8 +124,10 @@ int main(int argc, char **argv)
 	tf::TransformListener mapToKinectListener; // creating the transform to put data from the transform listener
 	ros::Subscriber tagSub = tagPoseSubNodehandle.subscribe("tag_pose", 1000, tagPoseToMarkerCallback); // creating
 	// subscriber for the tag_pose (later an actual box. hopefully)
-	ros::Publisher boxPublisher = markerPubNodehandle.advertise<visualization_msgs::Marker>("tag_marker", 1000);
+	printf ("%s \n", "Subscribing to /tag_pose");
 
+	ros::Publisher boxPublisher = markerPubNodehandle.advertise<visualization_msgs::Marker>("tag_marker", 1000);
+	printf ("%s \n", "Publishing to /tag_marker");
 	ros::Rate rate(10.0); // loop rate for callback in Hz.
 
 	while (ros::ok())  // while ROS is running
