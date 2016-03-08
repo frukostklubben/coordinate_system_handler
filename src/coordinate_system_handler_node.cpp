@@ -20,6 +20,7 @@
 
 
 tf::StampedTransform transform;
+
 visualization_msgs::Marker tagPoseMarker;
 geometry_msgs::Pose tagPose;
 geometry_msgs::Pose robPose;
@@ -121,9 +122,11 @@ int main(int argc, char **argv)
 	ros::NodeHandle tagPoseSubNodehandle;  // creating the nodehandle for the sub
 	ros::NodeHandle markerPubNodehandle;
 
-	tf::TransformListener mapToKinectListener; // creating the transform to put data from the transform listener
+	
 	ros::Subscriber tagSub = tagPoseSubNodehandle.subscribe("tag_pose", 1000, tagPoseToMarkerCallback); // creating
 	// subscriber for the tag_pose (later an actual box. hopefully)
+	tf::TransformListener mapToKinectListener; // creating the transform to put data from the transform listener
+
 	printf ("%s \n", "Subscribing to /tag_pose");
 
 	ros::Publisher boxPublisher = markerPubNodehandle.advertise<visualization_msgs::Marker>("tag_marker", 1000);
@@ -134,7 +137,7 @@ int main(int argc, char **argv)
 	{
 		try
 		{
-			mapToKinectListener.lookupTransform("/map", "/camera_link", ros::Time(0), transform); // get data from transform
+			mapToKinectListener.lookupTransform("/camera_link", "/map, value> map;", ros::Time(0), transform); // get data from transform
 			// between /map and /camera_link frames
 		}
 		catch (tf::TransformException ex){ // no clue, some exception thingy that I didn't write.
