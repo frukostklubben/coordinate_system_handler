@@ -47,7 +47,7 @@ Eigen::Matrix4f getHomTrans(const tf::StampedTransform transform)
 	mTrans(3, 3) = 1;
 	// end of filling diagonal
 
-	// fill the rotation matrix with the robots Z-rotation transform.getRotation().y(); //
+	// fill the z-rotation matrix with the robots Z-rotation transform.getRotation().y(); //
 	mRotZ(0, 0) = cos(rotZ*PI/180); // told you it would simplify...
 	mRotZ(0, 1) = -sin(rotZ*PI/180);
 	mRotZ(1, 0) = sin(rotZ*PI/180);
@@ -59,15 +59,51 @@ Eigen::Matrix4f getHomTrans(const tf::StampedTransform transform)
 	mRotZ(3, 3) = 1;
 	// end of filling with ones
 
+	// fill the x-rotation matrix with 90 deg rotation
+	mRotX(2, 2) = cos(rotX);
+	mRotX(1, 1) = cos(rotX);
+	mRotX(2, 1) = sin(rotX);
+	mRotX(1, 2) = -sin(rotX);
+	// end of filling with 90 deg
 
+	// fill the rest of the diagonal with ones
+	mRotX(0, 0) = 1;
+	mRotX(3, 3) = 1;
+	// end of filling diagonal
+
+	// create the homogenous transformation matrix
+	homTrans = mTrans * mRotZ * mRotX;
 
 	return homTrans;
 
 
 } // end of getHomTrans();
 
+
+// creates the Marker from the tag pose
 void tagPoseToMarkerCallback(geometry_msgs::Pose tagPose)
 {
+
+	box.header.frame_id = "/map";
+	box.header.stamp = ros::Time();
+	box.ns = "box";
+	box.id = 0;
+	box.type = visualization_msgs::Marker::CUBE;
+	box.action = visualization_msgs::Marker::ADD;
+	box.scale.x = 0.5;
+	box.scale.y = 0.5;
+	box.scale.z = 0.5;
+	box.pose.position.x = tagPose.position.x;
+	box.pose.position.y = tagPose.position.y;
+	box.pose.position.z = tagPose.position.z;
+	box.pose.orientation.x = tagPose.orientation.x;
+	box.pose.orientation.y = tagPose.orientation.y;
+	box.pose.orientation.z = tagPose.orientation.z;
+	box.pose.orientation.w = tagPose.orientation.w;
+	box.color.a = 1.0;
+	box.color.r = 255; // mangenta 4 days
+	box.color.g = 20;
+	box.color.b = 147;
 
 
 
@@ -80,11 +116,13 @@ void tagPoseToMarkerCallback(geometry_msgs::Pose tagPose)
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv,"tagPoseListener");  // initializing ROS
-	ros::NodeHandle tagPoseSubNodehandle;  // creating the nodehandle
+	ros::NodeHandle tagPoseSubNodehandle;  // creating the nodehandle for the sub
+	ros::NodeHandle markerPubNodehandle;
 
 	tf::TransformListener mapToKinectListener; // creating the transform to put data from the transform listener
 	ros::Subscriber tagSub = tagPoseSubNodehandle.subscribe("tag_pose", 1000, tagPoseToMarkerCallback); // creating
 	// subscriber for the tag_pose (later an actual box. hopefully)
+	ros::Publisher boxPublisher = markerPubNodehandle.advertise<visualization_msgs::Marker>("tag_marker", 1000);
 
 	ros::Rate rate(10.0); // loop rate for callback in Hz.
 
@@ -102,6 +140,7 @@ int main(int argc, char **argv)
 
 		Eigen::Matrix4f homTrans = getHomTrans(transform); 	// send the transform to my awesome function that creates the homogenous transformation matrix
 
+		boxPublisher.publish(box);
 
 		// THIS IS WHERE PLENTY ASESOME CODE NEEDS TO BE WRITTEN, GET TO IT.
 
